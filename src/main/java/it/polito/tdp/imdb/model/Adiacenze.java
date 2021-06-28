@@ -1,6 +1,6 @@
 package it.polito.tdp.imdb.model;
 
-public class Adiacenze {
+public class Adiacenze implements Comparable<Adiacenze> {
 	
 	private Director d1;
 	private Director d2;
@@ -29,6 +29,17 @@ public class Adiacenze {
 	public void setPeso(int peso) {
 		this.peso = peso;
 	}
+	@Override
+	public int compareTo(Adiacenze o) {
+		// TODO Auto-generated method stub
+		return -(this.getPeso()-o.getPeso());
+	}
+	@Override
+	public String toString() {
+		return  d2 + "# attori condivisi " + peso + "\n";
+	}
+	
+	
 	
 
 }

@@ -10,32 +10,48 @@ import java.util.List;
 import java.util.Map;
 
 import it.polito.tdp.imdb.model.Actor;
+import it.polito.tdp.imdb.model.Adiacenze;
 import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Movie;
+import javafx.beans.binding.MapBinding;
 
 public class ImdbDAO {
 	
-	public List<Actor> listAllActors(){
-		String sql = "SELECT * FROM actors";
-		List<Actor> result = new ArrayList<Actor>();
+	public void listArchi(Map<Integer,Director>map, int anno,List<Adiacenze>rs){
+		String sql = "SELECT md1.director_id as id1,md2.director_id as id2,COUNT( r1.actor_id) AS peso "
+				+ "FROM movies_directors md1,movies_directors md2 ,roles r1,roles r2,movies m1,movies m2 "
+				+ "WHERE md1.director_id> md2.director_id "
+				+ " AND md1.movie_id= m1.id "
+				+ " AND m1.year =? AND m2.year =m1.year "
+				+ " AND md2.movie_id= m2.id "
+				+ "AND r1.movie_id=m1.id "
+				+ "AND r2.movie_id=m2.id "
+				+ "AND r1.actor_id=r2.actor_id "
+				+ "GROUP BY md1.director_id ,md2.director_id "
+				+ "HAVING COUNT( r1.actor_id)>0";
+//		List<Adiacenze> result = new ArrayList<>();
 		Connection conn = DBConnect.getConnection();
 
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
-
-				Actor actor = new Actor(res.getInt("id"), res.getString("first_name"), res.getString("last_name"),
-						res.getString("gender"));
+				Director d1 = map.get(res.getInt("id1"));
+				Director d2 = map.get(res.getInt("id2"));
+				if(d1!=null&&d2!=null) {
+					rs.add(new Adiacenze(d1,d2,res.getInt("peso")));
+				}
 				
-				result.add(actor);
+				
+				
 			}
 			conn.close();
-			return result;
+			return ;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			return ;
 		}
 	}
 	
